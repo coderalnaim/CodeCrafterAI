@@ -18,24 +18,43 @@ def generate_code_and_explanation(prompt, model="gpt-3.5-turbo", max_tokens=300)
     )
     generated_text = response.choices[0].message["content"].strip()
 
-    # Separate code and explanation
+    # Initialize variables
     code_section = ""
     explanation_section = ""
 
+    # Enhanced logic to handle code blocks and plain text explanations
     code_start = generated_text.find("```python")
     if code_start == -1:
         code_start = generated_text.find("```")
 
     if code_start != -1:
+        # If code blocks are detected
         code_start += len("```python") if "```python" in generated_text else len("```")
         code_end = generated_text.find("```", code_start)
-
         if code_end != -1:
             code_section = generated_text[code_start:code_end].strip()
             explanation_section = generated_text[code_end + len("```"):].strip()
         else:
             explanation_section = generated_text
     else:
+        # Fallback: Handle inline explanations with code interspersed
+        code_blocks = []
+        in_code_block = False
+        explanation_lines = []
+        for line in generated_text.splitlines():
+            if line.strip().startswith("```"):
+                in_code_block = not in_code_block
+                continue
+            if in_code_block:
+                code_blocks.append(line)
+            else:
+                explanation_lines.append(line)
+
+        code_section = "\n".join(code_blocks).strip()
+        explanation_section = "\n".join(explanation_lines).strip()
+
+    # If no explicit code block is detected, fallback to the old behavior
+    if not code_section:
         lines = generated_text.splitlines()
         code_lines = []
         explanation_lines = []
@@ -43,10 +62,10 @@ def generate_code_and_explanation(prompt, model="gpt-3.5-turbo", max_tokens=300)
 
         for line in lines:
             if code_mode and (
-                line.strip().startswith("In the improved code") or
-                line.strip().startswith("# Explanation") or
-                line.strip().startswith("Explanation") or
-                line.strip().startswith("In summary")
+                line.strip().startswith("In the improved code")
+                or line.strip().startswith("# Explanation")
+                or line.strip().startswith("Explanation")
+                or line.strip().startswith("In summary")
             ):
                 code_mode = False
             if code_mode:
