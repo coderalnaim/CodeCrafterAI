@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-echo "Setting up your environment..."
+echo "Setting up your environment for Unix-like systems..."
 
 # Step 1: Set Working Directory
 BASE_DIR=$(cd "$(dirname "$0")" && pwd)

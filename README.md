@@ -33,16 +33,26 @@ A Python-based application for generating, improving, and running Python code wi
 
 #### **2. Set Up the Environment**
 Run the setup script to create a virtual environment and install dependencies:
-
+   ##### **For Unix-like Systems (macOS, Linux, WSL, Git Bash):**
    ```bash
    bash setup.sh
    ```
 
-#### **3. Start the Application**
-Launch the app by running the `run.sh` script:
+   #### **For Windows (Command Prompt):**
+   ```bash
+   setup.cmd
+   ```
 
+#### **3. Start the Application**
+Launch the app by running the `run` script.
+   ##### **For Unix-like Systems (macOS, Linux, WSL, Git Bash):**
    ```bash
    bash run.sh
+   ```
+
+   #### **For Windows (Command Prompt):**
+   ```bash
+   run.cmd
    ```
 
 #### **4. Input Your API Key**
