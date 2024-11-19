@@ -12,7 +12,7 @@ openai.api_key = OPENAI_API_KEY
 def generate_code_and_explanation(prompt, model="gpt-3.5-turbo", max_tokens=300):
     response = openai.ChatCompletion.create(
         model=model,
-        messages=[{"role": "user", "content": f"Generate Python code for: {prompt}. Then explain it briefly in plain text. Always start explanation with '# Explanation' "}],
+        messages = [{"role": "user", "content": f"Generate Python code for: {prompt}. Then explain it briefly in plain text. Always start explanation with '# Explanation'. Provide the Python code in a code block (use ```python and ```). The explanation should follow immediately after the code block."}]
         max_tokens=max_tokens,
         temperature=0.3,
     )
