@@ -1,10 +1,10 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 echo "Setting up your environment..."
 
-# Step 1: Dynamically Set Working Directory
+# Step 1: Set Working Directory
 BASE_DIR=$(cd "$(dirname "$0")" && pwd)
-cd "$BASE_DIR" || { echo "Error: Failed to change directory to $BASE_DIR. Exiting."; exit 1; }
+cd "$BASE_DIR" || { echo "Error: Failed to change directory. Exiting."; exit 1; }
 
 echo "Using working directory: \"$BASE_DIR\""
 
@@ -20,35 +20,38 @@ fi
 
 echo "Using Python executable: $PYTHON_EXECUTABLE"
 
-# Step 3: Create a Virtual Environment
+# Step 3: Create Virtual Environment
 if [ ! -d "venv" ]; then
     echo "Creating virtual environment..."
-    $PYTHON_EXECUTABLE -m venv venv || { echo "Error: Failed to create virtual environment. Exiting."; exit 1; }
+    $PYTHON_EXECUTABLE -m venv venv || { echo "Error: Failed to create virtual environment."; exit 1; }
 else
     echo "Virtual environment already exists. Skipping creation."
 fi
 
 # Step 4: Activate the Virtual Environment
-if [ -f "venv/bin/activate" ]; then
-    source venv/bin/activate || { echo "Error: Failed to activate virtual environment. Exiting."; exit 1; }
-elif [ -f "venv/Scripts/activate" ]; then # Windows WSL Compatibility
-    source venv/Scripts/activate || { echo "Error: Failed to activate virtual environment (Windows). Exiting."; exit 1; }
+if [[ "$OSTYPE" == "msys" || "$OSTYPE" == "cygwin" ]]; then
+    ACTIVATE_SCRIPT="venv/Scripts/activate"
 else
-    echo "Error: Virtual environment activation script not found. Exiting."
+    ACTIVATE_SCRIPT="venv/bin/activate"
+fi
+
+if [ -f "$ACTIVATE_SCRIPT" ]; then
+    source "$ACTIVATE_SCRIPT"
+else
+    echo "Error: Could not find the activation script."
     exit 1
 fi
 
-# Debugging: Show Active Python Path
 echo "Active Python executable: $(which python)"
 
 # Step 5: Upgrade pip
 echo "Upgrading pip..."
-pip install --upgrade pip || { echo "Error: Failed to upgrade pip. Exiting."; deactivate; exit 1; }
+pip install --upgrade pip || { echo "Error: Failed to upgrade pip."; deactivate; exit 1; }
 
 # Step 6: Install Requirements
 if [ -f "$BASE_DIR/requirements.txt" ]; then
     echo "Installing dependencies from requirements.txt..."
-    pip install -r "$BASE_DIR/requirements.txt" || { echo "Error: Failed to install dependencies. Exiting."; deactivate; exit 1; }
+    pip install -r "$BASE_DIR/requirements.txt" || { echo "Error: Failed to install dependencies."; deactivate; exit 1; }
 else
     echo "Error: requirements.txt not found in \"$BASE_DIR\". Please ensure it exists."
     deactivate
