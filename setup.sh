@@ -2,9 +2,11 @@
 
 echo "Setting up your environment..."
 
-# Set the script's directory as the base directory
-BASE_DIR=$(dirname "$0")
-cd "$BASE_DIR"
+# Set the script's directory as the working directory
+BASE_DIR=$(cd "$(dirname "$0")" && pwd)
+cd "$BASE_DIR" || { echo "Failed to change directory to $BASE_DIR. Exiting."; exit 1; }
+
+echo "Using working directory: $(pwd)"
 
 # Check for Python or Python3
 if command -v python3 &>/dev/null; then
