@@ -30,12 +30,12 @@ source venv/bin/activate || { echo "Failed to activate virtual environment. Exit
 echo "Directory contents: $(ls -l)"
 
 # Step 3: Upgrade pip to the latest version
-pip install --upgrade pip
+$BASE_DIR/venv/bin/pip install --upgrade pip
 
-# Step 4: Install required packages
+# Step 4: Install required packages using full path
 if [ -f "$BASE_DIR/requirements.txt" ]; then
     echo "requirements.txt found at: \"$BASE_DIR/requirements.txt\""
-    pip install -r "$BASE_DIR/requirements.txt"
+    $BASE_DIR/venv/bin/pip install -r "$BASE_DIR/requirements.txt"
 else
     echo "Error: requirements.txt not found in \"$BASE_DIR\". Please ensure it exists."
     deactivate
