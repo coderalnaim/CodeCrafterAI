@@ -2,6 +2,10 @@
 
 echo "Setting up your environment..."
 
+# Set the script's directory as the base directory
+BASE_DIR=$(dirname "$0")
+cd "$BASE_DIR"
+
 # Check for Python or Python3
 if command -v python3 &>/dev/null; then
     PYTHON_EXECUTABLE="python3"
