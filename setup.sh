@@ -2,13 +2,13 @@
 
 echo "Setting up your environment..."
 
-# Set the script's directory as the working directory
+# Step 1: Dynamically Set Working Directory
 BASE_DIR=$(cd "$(dirname "$0")" && pwd)
-cd "$BASE_DIR" || { echo "Failed to change directory to $BASE_DIR. Exiting."; exit 1; }
+cd "$BASE_DIR" || { echo "Error: Failed to change directory to $BASE_DIR. Exiting."; exit 1; }
 
 echo "Using working directory: \"$BASE_DIR\""
 
-# Check for Python or Python3
+# Step 2: Check Python Installation
 if command -v python3 &>/dev/null; then
     PYTHON_EXECUTABLE="python3"
 elif command -v python &>/dev/null; then
@@ -20,22 +20,35 @@ fi
 
 echo "Using Python executable: $PYTHON_EXECUTABLE"
 
-# Step 1: Create a virtual environment
-$PYTHON_EXECUTABLE -m venv venv
+# Step 3: Create a Virtual Environment
+if [ ! -d "venv" ]; then
+    echo "Creating virtual environment..."
+    $PYTHON_EXECUTABLE -m venv venv || { echo "Error: Failed to create virtual environment. Exiting."; exit 1; }
+else
+    echo "Virtual environment already exists. Skipping creation."
+fi
 
-# Step 2: Activate the virtual environment
-source venv/bin/activate || { echo "Failed to activate virtual environment. Exiting."; exit 1; }
+# Step 4: Activate the Virtual Environment
+if [ -f "venv/bin/activate" ]; then
+    source venv/bin/activate || { echo "Error: Failed to activate virtual environment. Exiting."; exit 1; }
+elif [ -f "venv/Scripts/activate" ]; then # Windows WSL Compatibility
+    source venv/Scripts/activate || { echo "Error: Failed to activate virtual environment (Windows). Exiting."; exit 1; }
+else
+    echo "Error: Virtual environment activation script not found. Exiting."
+    exit 1
+fi
 
-# Debugging: List directory contents
-echo "Directory contents: $(ls -l)"
+# Debugging: Show Active Python Path
+echo "Active Python executable: $(which python)"
 
-# Step 3: Upgrade pip to the latest version
-$BASE_DIR/venv/bin/pip install --upgrade pip
+# Step 5: Upgrade pip
+echo "Upgrading pip..."
+pip install --upgrade pip || { echo "Error: Failed to upgrade pip. Exiting."; deactivate; exit 1; }
 
-# Step 4: Install required packages using full path
+# Step 6: Install Requirements
 if [ -f "$BASE_DIR/requirements.txt" ]; then
-    echo "requirements.txt found at: \"$BASE_DIR/requirements.txt\""
-    $BASE_DIR/venv/bin/pip install -r "$BASE_DIR/requirements.txt"
+    echo "Installing dependencies from requirements.txt..."
+    pip install -r "$BASE_DIR/requirements.txt" || { echo "Error: Failed to install dependencies. Exiting."; deactivate; exit 1; }
 else
     echo "Error: requirements.txt not found in \"$BASE_DIR\". Please ensure it exists."
     deactivate
@@ -43,3 +56,6 @@ else
 fi
 
 echo "Setup complete! Use './run.sh' to launch the app."
+
+# Step 7: Deactivate Virtual Environment After Setup
+deactivate
