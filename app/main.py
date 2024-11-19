@@ -6,7 +6,7 @@ import tempfile
 import os
 
 # Set your OpenAI API key here
-OPENAI_API_KEY = input('Please Enter Your OpenAI API Key:/n')
+OPENAI_API_KEY = input('Please Enter Your OpenAI API Key:\n')
 openai.api_key = os.getenv(OPENAI_API_KEY)
 
 def generate_code_and_explanation(prompt, model="gpt-3.5-turbo", max_tokens=300):
