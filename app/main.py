@@ -9,50 +9,55 @@ import os
 OPENAI_API_KEY = input('Please Enter Your OpenAI API Key:\n')
 openai.api_key = OPENAI_API_KEY
 
-import re
-
 def generate_code_and_explanation(prompt, model="gpt-3.5-turbo", max_tokens=300):
-    # Generate the response using OpenAI's model
     response = openai.ChatCompletion.create(
         model=model,
-        messages=[{"role": "user", "content": f"Generate Python code for: {prompt}. Then explain it briefly in plain text."}],
+        messages=[{"role": "user", "content": f"Generate Python code for: {prompt}. Then explain it briefly in plain text. Always start explanation with '# Explanation' "}],
         max_tokens=max_tokens,
         temperature=0.3,
     )
     generated_text = response.choices[0].message["content"].strip()
 
-    # Initialize sections
-    code_lines = []
-    explanation_lines = []
+    # Separate code and explanation
+    code_section = ""
+    explanation_section = ""
 
-    # Detect if a line is likely code using regular expressions
-    def is_code_line(line):
-        # Heuristic for code detection
-        code_patterns = [
-            r"^\s*(def|class|import|return|if|else|for|while|try|except|print|from|with|as|break|continue|pass|yield|lambda)\b",  # Common Python keywords
-            r"\b(print|open|close|write|read|append|extend|pop|get|set|del)\b",  # Common method calls
-            r"[:{}\[\]()]$",  # Code structure symbols
-            r"^\s*#.*",  # Comment lines
-            r"^[A-Za-z0-9_.]+\([^\)]*\)$",  # Function or method calls
-        ]
-        return any(re.search(pattern, line) for pattern in code_patterns)
+    code_start = generated_text.find("```python")
+    if code_start == -1:
+        code_start = generated_text.find("```")
 
-    # Classify each line
-    for line in generated_text.splitlines():
-        if is_code_line(line):
-            code_lines.append(line)
+    if code_start != -1:
+        code_start += len("```python") if "```python" in generated_text else len("```")
+        code_end = generated_text.find("```", code_start)
+
+        if code_end != -1:
+            code_section = generated_text[code_start:code_end].strip()
+            explanation_section = generated_text[code_end + len("```"):].strip()
         else:
-            explanation_lines.append(line)
+            explanation_section = generated_text
+    else:
+        lines = generated_text.splitlines()
+        code_lines = []
+        explanation_lines = []
+        code_mode = True
 
-    # Handle edge cases where code and explanation might be mixed in single lines
-    code_block = "\n".join(code_lines).strip()
-    explanation_block = "\n".join(explanation_lines).strip()
+        for line in lines:
+            if code_mode and (
+                line.strip().startswith("In the improved code") or
+                line.strip().startswith("# Explanation") or
+                line.strip().startswith("Explanation") or
+                line.strip().startswith("In summary")
+            ):
+                code_mode = False
+            if code_mode:
+                code_lines.append(line)
+            else:
+                explanation_lines.append(line)
 
-    # Fallback: If no clear code is detected, treat everything as explanation
-    if not code_block and explanation_block:
-        explanation_block = generated_text
+        code_section = "\n".join(code_lines).strip()
+        explanation_section = "\n".join(explanation_lines).strip()
 
-    return code_block, explanation_block
+    return code_section, explanation_section
 
 
 def main(page: ft.Page):
