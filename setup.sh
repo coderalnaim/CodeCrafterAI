@@ -30,10 +30,10 @@ source venv/bin/activate || { echo "Failed to activate virtual environment. Exit
 pip install --upgrade pip
 
 # Step 4: Install required packages
-if [ -f requirements.txt ]; then
-    pip install -r requirements.txt
+if [ -f "$BASE_DIR/requirements.txt" ]; then
+    pip install -r "$BASE_DIR/requirements.txt"
 else
-    echo "Error: requirements.txt not found. Please ensure it exists in the project root."
+    echo "Error: requirements.txt not found in $BASE_DIR. Please ensure it exists."
     deactivate
     exit 1
 fi
