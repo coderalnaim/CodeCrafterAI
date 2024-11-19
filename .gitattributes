@@ -1,4 +1,0 @@
-setup.unix.template filter=platform-specific
-setup.windows.template filter=platform-specific
-run.unix.template filter=platform-specific
-run.windows.template filter=platform-specific
