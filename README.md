@@ -27,7 +27,7 @@ A Python-based application for generating, improving, and running Python code wi
 
 #### **1. Clone the Repository**
    ```bash
-   git clone https://github.com/yourusername/GenerativeAI_IDE.git
+   git clone https://github.com/coderalnaim/CodeCrafterAI.git
    cd GenerativeAI_IDE
    ```
 
