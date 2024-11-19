@@ -31,6 +31,7 @@ pip install --upgrade pip
 
 # Step 4: Install required packages
 if [ -f "$BASE_DIR/requirements.txt" ]; then
+    echo "requirements.txt found at: $BASE_DIR/requirements.txt"
     pip install -r "$BASE_DIR/requirements.txt"
 else
     echo "Error: requirements.txt not found in $BASE_DIR. Please ensure it exists."
