@@ -32,30 +32,37 @@ A Python-based application for generating, improving, and running Python code wi
    ```
 
 #### **2. Set Up the Environment**
-Run the setup script to create a virtual environment and install dependencies:
+Create and activate a virtual environment:
    ##### **For Unix-like Systems (macOS, Linux, WSL, Git Bash):**
    ```bash
-   bash setup.sh
+   python3 -m venv venv
+   source venv/bin/activate
    ```
 
    #### **For Windows (Command Prompt):**
    ```bash
-   setup.cmd
+   python -m venv venv
+   venv\Scripts\activate
    ```
 
-#### **3. Start the Application**
-Launch the app by running the `run` script.
+#### **3. Install Dependencies**
+   ```bash
+   pip install -r requirements.txt
+   ```
+
+#### **4. Start the Application**
+Run the main application file:
    ##### **For Unix-like Systems (macOS, Linux, WSL, Git Bash):**
    ```bash
-   bash run.sh
+   python3 app/main.py
    ```
 
    #### **For Windows (Command Prompt):**
    ```bash
-   run.cmd
+   python app/main.py
    ```
 
-#### **4. Input Your API Key**
+#### **5. Input Your API Key**
 When prompted, enter your OpenAI API key. The key will be stored temporarily as an environment variable for the current session.
 
 ---
@@ -88,8 +95,6 @@ GenerativeAI_IDE/
 │   ├── main.py           # Main Python script for the app
 ├── README.md             # Project documentation
 ├── requirements.txt      # Python dependencies
-├── setup.sh              # Shell script to set up the environment
-├── run.sh                # Shell script to run the application
 ├── .gitignore            # Files to ignore in Git
 ```
 
@@ -105,11 +110,15 @@ If you encounter any issues during installation or while running the app, check 
      ```bash
      python --version
      ```
+     or
+     ```bash
+     python3 --version
+     ```
 
 2. **Virtual Environment**:
    - If the virtual environment is not created or activated, manually create and activate it:
      ```bash
-     python -m venv venv
+     python3 -m venv venv
      source venv/bin/activate  # On Windows: venv\Scripts\activate
      ```
 
