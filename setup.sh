@@ -46,10 +46,14 @@ echo "Upgrading pip..."
 pip install --upgrade pip || { echo "Error: Failed to upgrade pip. Exiting."; deactivate; exit 1; }
 
 # Step 6: Install Requirements
-
-echo "Installing dependencies from requirements.txt..."
-pip install -r "requirements.txt" || { echo "Error: Failed to install dependencies. Exiting."; deactivate; exit 1; }
-
+if [ -f "$BASE_DIR/requirements.txt" ]; then
+    echo "Installing dependencies from requirements.txt..."
+    pip install -r "$BASE_DIR/requirements.txt" || { echo "Error: Failed to install dependencies. Exiting."; deactivate; exit 1; }
+else
+    echo "Error: requirements.txt not found in \"$BASE_DIR\". Please ensure it exists."
+    deactivate
+    exit 1
+fi
 
 echo "Setup complete! Use './run.sh' to launch the app."
 
