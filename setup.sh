@@ -6,7 +6,7 @@ echo "Setting up your environment..."
 BASE_DIR=$(cd "$(dirname "$0")" && pwd)
 cd "$BASE_DIR" || { echo "Failed to change directory to $BASE_DIR. Exiting."; exit 1; }
 
-echo "Using working directory: $(pwd)"
+echo "Using working directory: \"$BASE_DIR\""
 
 # Check for Python or Python3
 if command -v python3 &>/dev/null; then
@@ -26,15 +26,18 @@ $PYTHON_EXECUTABLE -m venv venv
 # Step 2: Activate the virtual environment
 source venv/bin/activate || { echo "Failed to activate virtual environment. Exiting."; exit 1; }
 
+# Debugging: List directory contents
+echo "Directory contents: $(ls -l)"
+
 # Step 3: Upgrade pip to the latest version
 pip install --upgrade pip
 
 # Step 4: Install required packages
 if [ -f "$BASE_DIR/requirements.txt" ]; then
-    echo "requirements.txt found at: $BASE_DIR/requirements.txt"
+    echo "requirements.txt found at: \"$BASE_DIR/requirements.txt\""
     pip install -r "$BASE_DIR/requirements.txt"
 else
-    echo "Error: requirements.txt not found in $BASE_DIR. Please ensure it exists."
+    echo "Error: requirements.txt not found in \"$BASE_DIR\". Please ensure it exists."
     deactivate
     exit 1
 fi
