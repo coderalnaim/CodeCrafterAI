@@ -10,13 +10,37 @@ OPENAI_API_KEY = input('Please Enter Your OpenAI API Key:\n')
 openai.api_key = OPENAI_API_KEY
 
 def generate_code_and_explanation(prompt, model="gpt-3.5-turbo", max_tokens=300):
+    messages = [
+        {
+            "role": "system",
+            "content": (
+                "You are a helpful assistant that only provides Python code and code explanations. "
+                "If the user's request is not related to Python programming, politely inform them "
+                "that you can only assist with Python code."
+            )
+        },
+        {
+            "role": "user",
+            "content": (
+                f"Generate Python code for: {prompt}. Then explain it briefly in plain text. "
+                "Always start explanation with '# Explanation'. Provide the Python code in a code block "
+                "(use ```python and ```). The explanation should follow immediately after the code block."
+            )
+        }
+    ]
     response = openai.ChatCompletion.create(
         model=model,
-        messages = [{"role": "user", "content": f"Generate Python code for: {prompt}. Then explain it briefly in plain text. Always start explanation with '# Explanation'. Provide the Python code in a code block (use ```python and ```). The explanation should follow immediately after the code block."}],
+        messages=messages,
         max_tokens=max_tokens,
         temperature=0.3,
     )
     generated_text = response.choices[0].message["content"].strip()
+
+    # Check if the assistant indicates an invalid request
+    if ("I can only assist with Python programming" in generated_text or
+        "not related to Python programming" in generated_text or
+        "I can only provide assistance with Python code" in generated_text):
+        return None, "Invalid request: The prompt is not related to Python programming."
 
     # Separate code and explanation
     code_section = ""
@@ -59,6 +83,9 @@ def generate_code_and_explanation(prompt, model="gpt-3.5-turbo", max_tokens=300)
 
     return code_section, explanation_section
 
+def is_python_related(text):
+    python_keywords = ["python", "code", "function", "class", "script", "module", "variable", "def", "import"]
+    return any(keyword in text.lower() for keyword in python_keywords)
 
 def main(page: ft.Page):
     page.title = "Generative AI IDE"
@@ -162,8 +189,8 @@ def main(page: ft.Page):
             file.write(code_value)
 
         print(save_file_path.value)
-        
-        file_label.value = save_file_path.value.split("/")[-1]# Update the label with the new file name
+
+        file_label.value = save_file_path.value.split("/")[-1]  # Update the label with the new file name
         page.update()
 
     save_file_dialog = ft.FilePicker(on_result=save_file_result)
@@ -173,9 +200,28 @@ def main(page: ft.Page):
     # Function to handle code generation prompt
     def handle_prompt():
         prompt_text = prompt_input.value
+        if not is_python_related(prompt_text):
+            snack_bar = ft.SnackBar(
+                ft.Text("Invalid request: Please enter a prompt related to Python programming."),
+                bgcolor="red"
+            )
+            page.show_snack_bar(snack_bar)
+            return
+
         generated_code, explanation = generate_code_and_explanation(prompt_text)
-        code_editor.value = generated_code
-        explanation_area.value = explanation
+        if generated_code is None:
+            # Show a SnackBar with the error message
+            snack_bar = ft.SnackBar(
+                ft.Text(explanation),
+                bgcolor="red"
+            )
+            page.show_snack_bar(snack_bar)
+            code_editor.value = ""
+            explanation_area.value = ""
+            terminal_output.value = ""
+        else:
+            code_editor.value = generated_code
+            explanation_area.value = explanation
         page.update()
 
     # Function to run code and display output
@@ -196,10 +242,18 @@ def main(page: ft.Page):
         selected_text = improve_input.value
         if selected_text:
             prompt = f"Improve the following code:\n{selected_text}"
-            improved_code, explanation = generate_code_and_explanation(prompt)
-            code_editor.value += f"\n# Improved code:\n{improved_code}\n"
-            explanation_area.value = explanation
-            improve_input.value = ""
+            generated_code, explanation = generate_code_and_explanation(prompt)
+            if generated_code is None:
+                snack_bar = ft.SnackBar(
+                    ft.Text("Invalid request: Please enter valid Python code to improve."),
+                    bgcolor="red"
+                )
+                page.show_snack_bar(snack_bar)
+                explanation_area.value = ""
+            else:
+                code_editor.value += f"\n# Improved code:\n{generated_code}\n"
+                explanation_area.value = explanation
+                improve_input.value = ""
         page.update()
 
     # Implementing new file selection functionality
@@ -207,12 +261,13 @@ def main(page: ft.Page):
         page.add(filepicker)
         filepicker.pick_files("Select file...")
 
-    def return_file(e: ft.FilePickerResultEvent): 
-        with open(e.files[0].path, "r") as file:
-            code_value = file.read()
-            code_editor.value = code_value
-        file_label.value = e.files[0].name  # Update the label with the new file name
-        page.update()
+    def return_file(e: ft.FilePickerResultEvent):
+        if e.files:
+            with open(e.files[0].path, "r") as file:
+                code_value = file.read()
+                code_editor.value = code_value
+            file_label.value = e.files[0].name  # Update the label with the new file name
+            page.update()
 
     # Adding the file selection and file path display components beside the save button
     filepicker = ft.FilePicker(on_result=return_file)
@@ -222,7 +277,7 @@ def main(page: ft.Page):
         "Save File", on_click=lambda e: save_file_dialog.save_file(
                         "Select py file...",
                         file_name="main.py",
-                        file_type= ft.FilePickerFileType.CUSTOM,
+                        file_type=ft.FilePickerFileType.CUSTOM,
                         allowed_extensions=["py"]
                     ), icon=ft.icons.SAVE, bgcolor="#5bc0de", color="white"
     )
